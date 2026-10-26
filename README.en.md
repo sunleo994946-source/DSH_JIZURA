@@ -33,19 +33,42 @@ This plugin runs that engine in headless Chrome and exposes it as DSH tools call
 **Requires**: DSH · Node ≥ 22 · Chrome or Chromium · ffmpeg
 
 ```bash
-cd ~/.dsh/profiles/desktop
-pnpm add github:sunleo994946-source/DSH_JIZURA
+npx github:sunleo994946-source/DSH_JIZURA install
 ```
 
-Add one entry to `dsh.profile.bundles` in `~/.dsh/profiles/desktop/package.json`:
+A plugin must be registered in two places or it will not load (`dependencies` and `dsh.profile.bundles`). This command writes both, then runs `pnpm install`.
 
-```json
-"bundles": ["...", "dsh-jizura"]
+Then **restart DSH** and ask the agent to call `jizura_health`.
+
+```bash
+npx github:sunleo994946-source/DSH_JIZURA doctor      # check Chrome / ffmpeg / dependency / bundles
+npx github:sunleo994946-source/DSH_JIZURA uninstall
 ```
 
-Then restart DSH. Plugins load at startup; without a restart the tools will not appear. Call `jizura_health` to confirm Chrome and ffmpeg are available.
+<details>
+<summary>Manual install / custom profile / local development</summary>
 
-> If the tools are missing, check in order: the `bundles` entry, the restart, and whether `node_modules/dsh-jizura` exists.
+```bash
+# custom source
+npx github:sunleo994946-source/DSH_JIZURA install --spec github:you/fork
+
+# local directory (edits take effect immediately)
+npx github:sunleo994946-source/DSH_JIZURA install --link /path/to/DSH_JIZURA
+
+# pick a profile when several exist
+npx github:sunleo994946-source/DSH_JIZURA install --profile web
+```
+
+Fully manual (DSH's own command only does step one; `bundles` is up to you):
+
+```bash
+dsh plugin --profile desktop add github:sunleo994946-source/DSH_JIZURA
+# then edit ~/.dsh/profiles/desktop/package.json and add "dsh-jizura" to dsh.profile.bundles
+```
+
+> If the tools never appear, check in order: the `bundles` entry, the restart, `node_modules/dsh-jizura`. `doctor` reports all three.
+
+</details>
 
 ## Usage
 

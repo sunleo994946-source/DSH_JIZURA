@@ -33,19 +33,42 @@
 **需要**：DSH · Node ≥ 22 · Chrome 或 Chromium · ffmpeg
 
 ```bash
-cd ~/.dsh/profiles/desktop
-pnpm add github:sunleo994946-source/DSH_JIZURA
+npx github:sunleo994946-source/DSH_JIZURA install
 ```
 
-在 `~/.dsh/profiles/desktop/package.json` 的 `dsh.profile.bundles` 数组中添加一项：
+插件要在 profile 里登记两处才加载得出来（`dependencies` 和 `dsh.profile.bundles`），这条命令两处一起写，然后跑 `pnpm install`。
 
-```json
-"bundles": ["...", "dsh-jizura"]
+装完**重启 DSH**，让 AI 调用 `jizura_health` 确认。
+
+```bash
+npx github:sunleo994946-source/DSH_JIZURA doctor      # 体检：Chrome / ffmpeg / 依赖 / bundles
+npx github:sunleo994946-source/DSH_JIZURA uninstall
 ```
 
-然后重启 DSH。插件在启动时加载，未重启时工具不会出现。装好后调用 `jizura_health` 确认 Chrome 与 ffmpeg 均可用。
+<details>
+<summary>手动安装 / 指定 profile / 本地开发</summary>
 
-> 工具未出现时按顺序检查：`bundles` 是否添加、是否重启、`node_modules/dsh-jizura` 是否存在。
+```bash
+# 自定义来源
+npx github:sunleo994946-source/DSH_JIZURA install --spec github:you/fork
+
+# 本地目录（改完即生效）
+npx github:sunleo994946-source/DSH_JIZURA install --link /path/to/DSH_JIZURA
+
+# 多个 profile 时指定
+npx github:sunleo994946-source/DSH_JIZURA install --profile web
+```
+
+完全手动（DSH 自带命令只做第一步，`bundles` 得自己加）：
+
+```bash
+dsh plugin --profile desktop add github:sunleo994946-source/DSH_JIZURA
+# 再编辑 ~/.dsh/profiles/desktop/package.json，把 "dsh-jizura" 加进 dsh.profile.bundles
+```
+
+> 工具没出现时按顺序查：`bundles` 有没有加、有没有重启、`node_modules/dsh-jizura` 在不在。`doctor` 会一次告出这三项。
+
+</details>
 
 ## 用法
 

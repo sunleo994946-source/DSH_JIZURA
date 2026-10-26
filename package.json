@@ -11,6 +11,7 @@
   },
   "files": [
     "lib",
+    "bin",
     "engine",
     "skills",
     "tools",
@@ -54,5 +55,8 @@
   "bugs": {
     "url": "https://github.com/sunleo994946-source/DSH_JIZURA/issues"
   },
-  "author": "sunleo994946-source"
+  "author": "sunleo994946-source",
+  "bin": {
+    "jizura": "bin/jizura.mjs"
+  }
 }
