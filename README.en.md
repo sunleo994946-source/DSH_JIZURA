@@ -4,6 +4,11 @@ A DSH plugin for Japanese-style lyric motion (文字PV): lyrics or subtitles in,
 
 [中文](README.md)
 
+![Demo](docs/demo.gif)
+
+Demo rendered from 《神のまにまに - 初音ミク》: an LRC file and a style name, `style: magenta`, `seed: 20261026`, no engine changes.
+Full segments (720p, with audio): [intro](docs/clips/01-intro.mp4) · [verse](docs/clips/02-verse.mp4) · [chorus](docs/clips/03-chorus.mp4)
+
 ## Why this exists
 
 Upstream is used as a full interface workflow: open the browser, load lyrics, try styles one by one, align timings, export — every step done by hand. It also ships After Effects panels that must be installed and learned separately.
@@ -15,8 +20,6 @@ This plugin keeps the engine and removes that operating chain. The caller is an 
 [852wa/JIZURA](https://github.com/852wa/JIZURA) (MIT) is a browser-based lyric animation engine: 860 parts and 27 style packs, arranging lyrics into animated cuts from a seed.
 
 This plugin runs that engine in headless Chrome and exposes it as DSH tools called by the agent. The part catalogue, lyric syntax and rendering rules are defined by the upstream repository.
-
-![Contact sheet](docs/contact-sheet.jpg)
 
 | Tool | Does |
 |---|---|
@@ -54,7 +57,11 @@ Three tools, in order:
 | 2 | `jizura_plan` | Cut plan + contact sheet (one frame per cut) + `project.json` |
 | 3 | `jizura_render` | MP4, or transparent front/back layers |
 
-The contact sheet from step 2 is for confirming the look before burning a full render.
+The contact sheet from step 2 is for confirming the look before burning a full render:
+
+![Contact sheet](docs/contact-sheet.jpg)
+
+`jizura_render` accepts `from` / `to` to render a single segment, so previews don't require the whole song.
 
 Three output forms:
 
@@ -80,7 +87,9 @@ Other: {no horror; keep project.json so I can re-render}
 Render the contact sheet first; the full song after I confirm.
 ```
 
-Subtitles accept `.srt` / `.lrc` / `.vtt`, with cue timings used as each line's start time; a `.txt` is treated as lyrics without timing. The plugin performs no audio beat analysis, so subtitle timings are the practical way to align lyrics with music.
+Subtitles accept `.srt` / `.lrc` / `.vtt`, with cue timings used as each line's start time; a `.txt` is treated as lyrics without timing. Bilingual lyrics (original and translation sharing timestamps) are reduced to one line per timestamp according to `Language`.
+
+The plugin performs no audio beat analysis, so subtitle timings are the practical way to align lyrics with music.
 
 ## License
 

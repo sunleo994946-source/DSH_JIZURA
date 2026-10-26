@@ -4,6 +4,11 @@
 
 [English](README.en.md)
 
+![示例](docs/demo.gif)
+
+示例用的是《神のまにまに - 初音ミク》：歌词和 LRC 直接给，`style: magenta`、`seed: 20261026`，一行代码没改。
+完整片段（720p，含音轨）：[开头](docs/clips/01-intro.mp4) · [主歌](docs/clips/02-verse.mp4) · [副歌](docs/clips/03-chorus.mp4)
+
 ## 为什么做这个
 
 原作的使用方式是完整的界面流程：打开浏览器、载入歌词、逐个试风格、对齐时间、导出，每一步都由人操作；此外还提供 After Effects 面板，需要单独安装和学习。
@@ -15,8 +20,6 @@
 [852wa/JIZURA](https://github.com/852wa/JIZURA)（MIT）是一个浏览器里的歌词动画引擎：860 个部件、27 个样式包，按 seed 把歌词编排成一段段动画。
 
 本插件让该引擎在无头 Chrome 里运行，包成 DSH 工具，由 agent 调用。部件目录、歌词语法、渲染规则以原作仓库为准。
-
-![联络图](docs/contact-sheet.jpg)
 
 | 工具 | 作用 |
 |---|---|
@@ -54,7 +57,11 @@ pnpm add github:sunleo994946-source/DSH_JIZURA
 | 2 | `jizura_plan` | cut 计划 + 联络图（每个 cut 一帧）+ `project.json` |
 | 3 | `jizura_render` | MP4，或透明前景/后景层 |
 
-第 2 步的联络图用于确认效果，避免整片渲完才发现风格不对。
+第 2 步的联络图用于确认效果，避免整片渲完才发现风格不对：
+
+![联络图](docs/contact-sheet.jpg)
+
+`jizura_render` 支持只渲一段（`from` / `to`），预览不必等整首渲完。
 
 输出三种形态：
 
@@ -80,7 +87,9 @@ pnpm add github:sunleo994946-source/DSH_JIZURA
 先出联络图，我确认后再渲染整片。
 ```
 
-字幕支持 `.srt` / `.lrc` / `.vtt`，时间戳作为每行的起始时刻；`.txt` 视为不带时间的歌词。插件不做音频节拍分析，字幕时间戳是让歌词对齐音乐的可行方式。
+字幕支持 `.srt` / `.lrc` / `.vtt`，时间戳作为每行的起始时刻；`.txt` 视为不带时间的歌词。双语歌词（原文 + 对照翻译共用时间戳）会按 `语言` 取一条，另一条丢弃。
+
+插件不做音频节拍分析，字幕时间戳是让歌词对齐音乐的可行方式。
 
 ## 许可
 
