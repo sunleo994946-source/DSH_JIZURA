@@ -1,0 +1,57 @@
+{
+  "name": "dsh-jizura",
+  "version": "0.1.0",
+  "description": "DSH 插件：JIZURA 文字PV 引擎作为工具集（计划 / 渲染 / 透明分层），并把它接到 HyperFrames —— 歌词出片，或出透明层交给 HyperFrames 合成。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "engine",
+    "skills",
+    "tools",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "docs"
+  ],
+  "scripts": {
+    "bundle": "node tools/bundle-engine.mjs",
+    "check": "node test/check.mjs",
+    "smoke": "node test/smoke.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "jizura",
+    "lyric-video",
+    "文字PV",
+    "kinetic-typography",
+    "hyperframes"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunleo994946-source/DSH_JIZURA.git"
+  },
+  "homepage": "https://github.com/sunleo994946-source/DSH_JIZURA#readme",
+  "bugs": {
+    "url": "https://github.com/sunleo994946-source/DSH_JIZURA/issues"
+  },
+  "author": "sunleo994946-source"
+}

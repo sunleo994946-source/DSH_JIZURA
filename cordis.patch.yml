@@ -1,0 +1,8 @@
+# dsh-jizura 组合包补丁：把 JIZURA 工具 + 技能插件行插入 profile。
+# 插件加载即注册 4 个工具（jizura_parts / jizura_plan / jizura_render / jizura_health）
+# 和技能 jizura-hyperframes；不需要额外配置。
+#
+- insert:
+    - id: jizura-tools
+      name: 'dsh-jizura'
+      config: {}

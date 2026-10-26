@@ -1,0 +1,8 @@
+# 渲染产物与临时目录
+test/.out/
+test/demo/
+jizura-out/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
