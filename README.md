@@ -4,10 +4,12 @@
 
 [English](README.en.md)
 
-![联络图](docs/contact-sheet.jpg)
+**为什么有这个** —— 原作功能很全，但它是个浏览器 GUI 工具，另配 After Effects 面板；部署和上手成本差不多等于装一套 AE。这个插件把那些全省掉：不打开界面、不装面板、不摆弄时间线，直接让 DSH 把歌词变成视频。
 
 > 引擎是 [852wa/JIZURA](https://github.com/852wa/JIZURA)（MIT）——860 个部件、27 个样式包、歌词语法、渲染细节都在原作仓库。
 > **本仓库只做 DSH 插件封装**：把引擎包成工具，外加一个 HyperFrames 交接技能。
+
+![联络图](docs/contact-sheet.jpg)
 
 **能做什么**
 

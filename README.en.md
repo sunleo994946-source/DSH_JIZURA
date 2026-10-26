@@ -4,10 +4,12 @@ Japanese-style lyric motion (文字PV) for DSH: **lyrics in, finished video out*
 
 [中文](README.md)
 
-![Contact sheet](docs/contact-sheet.jpg)
+**Why this exists** — upstream is a full browser GUI tool with its own After Effects panels. It is powerful, but getting it deployed and operated costs about as much as setting up After Effects. This plugin removes all of that: no UI to drive, no panel to install, no timeline to poke at — just ask DSH and get video.
 
 > The engine is [852wa/JIZURA](https://github.com/852wa/JIZURA) (MIT) — all 860 parts, 27 style packs, lyric syntax and rendering details live in that repository.
 > **This repository is only the DSH plugin wrapper**: the engine as tools, plus a HyperFrames handoff skill.
+
+![Contact sheet](docs/contact-sheet.jpg)
 
 **What you get**
 
