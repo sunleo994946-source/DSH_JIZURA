@@ -134,6 +134,7 @@ try {
     say('进度每 2 秒刷新一次，中途没有新行说明还在跑，不要中断');
 
     let last = 0;
+    let encodedAt = 0;
     const v = await r.renderVideo({
       out: path.join(outDir, 'lyrics.mp4'),
       fps: argv.fps ? Number(argv.fps) : undefined,
@@ -151,11 +152,19 @@ try {
         const left = p.done > 0 ? Math.round((p.ms / p.done) * (p.total - p.done) / 1000) : 0;
         process.stdout.write(`\r  ${pct}%  ${p.done}/${p.total}  已用 ${el}s  剩余 ~${left}s   `);
       },
+      onPhase: ph => {
+        if (ph.phase !== 'encode') return;
+        encodedAt = Date.now();
+        process.stdout.write('\r' + ' '.repeat(60) + '\r');
+        const area = Math.pow(argv.scale ? Number(argv.scale) : 1, 2);
+        const secs = Math.max(3, Math.round(ph.frames * 0.014 * area));   // x264 1080p 实测 ~70fps，按面积缩放
+        say(`渲染完成 ${ph.frames} 帧，开始编码（x264，约 ${secs < 60 ? secs + ' 秒' : (secs / 60).toFixed(1) + ' 分钟'}）…`);
+        say('这期间没有输出是正常的，编码完才写文件');
+      },
     });
-    process.stdout.write('\r' + ' '.repeat(60) + '\r');
-    say('编码中（ffmpeg x264，1080p 约 10–30 秒）…');
     const mb = (fs.statSync(v.file).size / 1048576).toFixed(1);
-    say(`视频 ${v.file} · ${v.frames} 帧 · ${mb} MB${v.audio ? '（含音轨）' : ''}`);
+    const encSec = encodedAt ? Math.round((Date.now() - encodedAt) / 1000) : 0;
+    say(`视频 ${v.file} · ${v.frames} 帧 · ${mb} MB${v.audio ? '（含音轨）' : ''}${encSec ? ` · 编码 ${encSec}s` : ''}`);
   }
   say(`输出目录 ${outDir}`);
 } catch (err) {
@@ -163,4 +172,6 @@ try {
   process.exitCode = 1;
 } finally {
   await r.close();
+  // 明确退出：Chrome 子进程偶尔会拖住事件循环，导致渲完了还"停不下来"
+  process.exit(process.exitCode || 0);
 }

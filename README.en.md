@@ -65,7 +65,7 @@ The contact sheet from step 2 is for confirming the look before burning a full r
 
 Or skip DSH and drive it from a terminal: `node tools/render.mjs --help`.
 
-**Renders take time**: a full 1080p render runs at roughly realtime (about 4 minutes for a 4-minute track). The CLI refreshes progress every 2 seconds; a quiet terminal means it is still rendering, not stuck. Inside DSH, `jizura_render` returns only when the whole render finishes and prints nothing meanwhile. Interrupting leaves a playable but truncated file.
+**Renders take time**: a full 1080p render runs at roughly realtime for the frame pass (about 4 minutes for a 4-minute track), then ffmpeg spends another 1–3 minutes encoding. The CLI refreshes progress every 2 seconds and prints an explicit switch to "encoding" when the frame pass ends; either phase can go quiet for a while — that is not a hang. Inside DSH, `jizura_render` returns only when everything finishes and prints nothing meanwhile. Interrupting leaves a playable but truncated file.
 
 Three output forms:
 
