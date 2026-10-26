@@ -63,6 +63,8 @@ The contact sheet from step 2 is for confirming the look before burning a full r
 
 `jizura_render` accepts `from` / `to` to render a single segment, so previews don't require the whole song.
 
+Or skip DSH and drive it from a terminal: `node tools/render.mjs --help`.
+
 Three output forms:
 
 - **Standalone MP4** — finished video, optional audio mux

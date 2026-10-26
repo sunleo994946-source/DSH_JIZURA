@@ -87,6 +87,14 @@
       S.plan = J.plan(p, null);
       const text = [p.lyrics, p.title, p.artist, FONT_PROBE].filter(Boolean).join(' ');
       await J.ensureFonts(text, null);
+      // Google Fonts 偶尔会漏掉几个字体族。缺了就是静默回退系统字体、画面变味，
+      // 所以重试两次再放弃，并把最终状态报上去。
+      let fonts = await fontReport();
+      for (let attempt = 0; attempt < 2 && fonts.missing.length; attempt++) {
+        await new Promise(res => setTimeout(res, 1500));
+        await J.ensureFonts(text, null);
+        fonts = await fontReport();
+      }
       S.renderer = new J.Renderer();
       S.scale = 1;
       S.canvas = canvasFor(S.plan.W, S.plan.H);
@@ -96,7 +104,7 @@
         width: S.plan.W, height: S.plan.H, W: S.plan.W, H: S.plan.H,
         aspect: p.aspect, fps: p.fps, style: p.style, seed: p.seed, lang: p.lang,
         cuts: S.plan.cuts.map((c, i) => cutInfo(c, i)),
-        fonts: await fontReport(),
+        fonts,
         project: p,                       // 合并后的完整项目：Node 侧原样落盘，保证可复现
         omakase,
       };

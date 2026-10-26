@@ -24,7 +24,8 @@
   "scripts": {
     "bundle": "node tools/bundle-engine.mjs",
     "check": "node test/check.mjs",
-    "smoke": "node test/smoke.mjs"
+    "smoke": "node test/smoke.mjs",
+    "render": "node tools/render.mjs"
   },
   "dsh": {
     "bundle": {

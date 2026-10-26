@@ -63,6 +63,8 @@ pnpm add github:sunleo994946-source/DSH_JIZURA
 
 `jizura_render` 支持只渲一段（`from` / `to`），预览不必等整首渲完。
 
+也可以不开 DSH，直接用命令行：`node tools/render.mjs --help`。
+
 输出三种形态：
 
 - **独立 MP4** — 完整成片，可混入音轨
