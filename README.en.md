@@ -4,11 +4,17 @@ A DSH plugin for Japanese-style lyric motion (文字PV): lyrics or subtitles in,
 
 [中文](README.md)
 
+## Why this exists
+
+Upstream is used as a full interface workflow: open the browser, load lyrics, try styles one by one, align timings, export — every step done by hand. It also ships After Effects panels that must be installed and learned separately.
+
+This plugin keeps the engine and removes that operating chain. The caller is an agent; the input is lyrics or subtitles plus one sentence of intent. Choosing the look, splitting cuts, previewing and rendering are done by the tools. The engine is not rewritten, so parts, styles and results match upstream.
+
 ## What this is
 
-[852wa/JIZURA](https://github.com/852wa/JIZURA) (MIT) is a browser-based lyric animation engine: 860 parts and 27 style packs, arranging lyrics into animated cuts from a seed. It is normally an interface program you operate by hand, with an optional After Effects panel.
+[852wa/JIZURA](https://github.com/852wa/JIZURA) (MIT) is a browser-based lyric animation engine: 860 parts and 27 style packs, arranging lyrics into animated cuts from a seed.
 
-This plugin runs that engine in headless Chrome and exposes it as DSH tools called by the agent. The engine code is unmodified; part catalogue, lyric syntax and rendering rules are defined by the upstream repository.
+This plugin runs that engine in headless Chrome and exposes it as DSH tools called by the agent. The part catalogue, lyric syntax and rendering rules are defined by the upstream repository.
 
 ![Contact sheet](docs/contact-sheet.jpg)
 
