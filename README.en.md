@@ -1,24 +1,23 @@
 # dsh-jizura
 
-Japanese-style lyric motion (文字PV) for DSH: **lyrics in, finished video out**.
+A DSH plugin for Japanese-style lyric motion (文字PV): lyrics or subtitles in, video out.
 
 [中文](README.md)
 
-**Why this exists** — upstream is software a person drives by hand: open the browser UI, load lyrics, tune the look part by part, align the timing, export. None of that exists here, because **the one operating it is the agent**. Describe the lyrics and the intent, and it picks the look, renders a contact sheet, re-rolls the seed and renders the video. You used to have to learn the whole interface; now you only have to describe what you want.
+## What this is
 
-> The engine is [852wa/JIZURA](https://github.com/852wa/JIZURA) (MIT) — all 860 parts, 27 style packs, lyric syntax and rendering details live in that repository.
-> **This repository is only the DSH plugin wrapper**: the engine as tools, plus a HyperFrames handoff skill.
+[852wa/JIZURA](https://github.com/852wa/JIZURA) (MIT) is a browser-based lyric animation engine: 860 parts and 27 style packs, arranging lyrics into animated cuts from a seed. It is normally an interface program you operate by hand, with an optional After Effects panel.
+
+This plugin runs that engine in headless Chrome and exposes it as DSH tools called by the agent. The engine code is unmodified; part catalogue, lyric syntax and rendering rules are defined by the upstream repository.
 
 ![Contact sheet](docs/contact-sheet.jpg)
 
-**What you get**
-
 | Tool | Does |
 |---|---|
-| `jizura_parts` | Browse available styles / layouts / decorations |
-| `jizura_plan` | Lyrics or subtitles → cut plan + contact sheet (one frame per cut) |
-| `jizura_render` | MP4, or transparent front/back layers for HyperFrames |
-| `jizura_health` | Check Chrome / ffmpeg / engine version |
+| `jizura_parts` | List available styles, layouts, decorations |
+| `jizura_plan` | Lyrics or subtitles → cut plan + contact sheet + `project.json` |
+| `jizura_render` | Produce an MP4, or transparent front/back layers |
+| `jizura_health` | Check Chrome, ffmpeg, engine version |
 
 ## Install
 
@@ -29,19 +28,37 @@ cd ~/.dsh/profiles/desktop
 pnpm add github:sunleo994946-source/DSH_JIZURA
 ```
 
-Then add one entry to `dsh.profile.bundles` in `~/.dsh/profiles/desktop/package.json`:
+Add one entry to `dsh.profile.bundles` in `~/.dsh/profiles/desktop/package.json`:
 
 ```json
 "bundles": ["...", "dsh-jizura"]
 ```
 
-**Restart DSH.** Then ask the agent to run `jizura_health` — Chrome and ffmpeg should both show ✅.
+Then restart DSH. Plugins load at startup; without a restart the tools will not appear. Call `jizura_health` to confirm Chrome and ffmpeg are available.
 
-> Three reasons it doesn't show up: missing `bundles` entry, no restart, `node_modules/dsh-jizura` missing.
+> If the tools are missing, check in order: the `bundles` entry, the restart, and whether `node_modules/dsh-jizura` exists.
 
-## How to brief the agent
+## Usage
 
-Copy this, replace the `{…}` placeholders with your own words. **Only the first two lines are required**; the rest fall back to defaults:
+Three tools, in order:
+
+| Step | Tool | Output |
+|---|---|---|
+| 1 | `jizura_parts` | List of available styles, layouts, decorations |
+| 2 | `jizura_plan` | Cut plan + contact sheet (one frame per cut) + `project.json` |
+| 3 | `jizura_render` | MP4, or transparent front/back layers |
+
+The contact sheet from step 2 is for confirming the look before burning a full render.
+
+Three output forms:
+
+- **Standalone MP4** — finished video, optional audio mux
+- **Black-keyed footage** — `keyBg: "black"`, composited over a HyperFrames stage with `mix-blend-mode: screen`
+- **Transparent layers** — `png_back/` and `png_front/`, with your own material between them
+
+## Prompt template
+
+Replace the `{…}` placeholders. The first two lines are required; the rest fall back to defaults.
 
 ```
 Make a lyric motion video with jizura.
@@ -54,24 +71,10 @@ Delivery: {standalone MP4 / goes into my HyperFrames project at <path>}
 Music: {assets/song.mp3 — delete this line if none}
 Other: {no horror; keep project.json so I can re-render}
 
-Show me the contact sheet first; render the full song after I approve.
+Render the contact sheet first; the full song after I confirm.
 ```
 
-**About subtitles**: `.srt` / `.lrc` / `.vtt` are all accepted. Cue timings become each line's start time — far more accurate than guessing from character count, and no audio analysis needed. A plain `.txt` works too; that's just lyrics without timing.
-
-**What you actually have to supply**: the lyrics (or subtitle file) and the language. Everything else — picking a look, choosing a seed, splitting cuts, rendering previews — the agent handles, then shows you the contact sheet.
-
-> The agent doesn't need part keys, seeds or browser instructions from you; it has `jizura_parts` and `jizura_plan`.
-
-## Flow
-
-```
-jizura_parts → jizura_plan (review the contact sheet) → jizura_render
-```
-
-Step two is the important one: one frame per cut in a single image. Adjust the look there, then render the full song.
-
-Three delivery shapes: standalone MP4 / black-keyed footage over a HyperFrames stage / transparent front+back layers framing your own material.
+Subtitles accept `.srt` / `.lrc` / `.vtt`, with cue timings used as each line's start time; a `.txt` is treated as lyrics without timing. The plugin performs no audio beat analysis, so subtitle timings are the practical way to align lyrics with music.
 
 ## License
 

@@ -1,24 +1,23 @@
 # dsh-jizura
 
-把日式「文字PV」（歌词动画）接进 DSH：**歌词进，成片出**。
+日式「文字PV」（歌词动画）的 DSH 插件：输入歌词或字幕，输出视频。
 
 [English](README.en.md)
 
-**为什么有这个** —— 原作是一套给人手操作的软件：打开浏览器界面、载入歌词、逐个调风格、对时间、导出。这些在这里都不存在了，因为**操作的人换成了 AI**：你把歌词和要求讲清楚，它自己挑风格、出联络图、改 seed、渲片。原来要学一整套界面，现在只要会说需求。
+## 这是什么
 
-> 引擎是 [852wa/JIZURA](https://github.com/852wa/JIZURA)（MIT）——860 个部件、27 个样式包、歌词语法、渲染细节都在原作仓库。
-> **本仓库只做 DSH 插件封装**：把引擎包成工具，外加一个 HyperFrames 交接技能。
+[852wa/JIZURA](https://github.com/852wa/JIZURA)（MIT）是一个浏览器里的歌词动画引擎：860 个部件、27 个样式包，按 seed 把歌词编排成一段段动画。它原本是需要手动操作的界面程序，另配 After Effects 面板。
+
+本插件让该引擎在无头 Chrome 里运行，包成 DSH 工具，由 agent 调用。引擎代码未做修改；部件目录、歌词语法、渲染规则以原作仓库为准。
 
 ![联络图](docs/contact-sheet.jpg)
 
-**能做什么**
-
 | 工具 | 作用 |
 |---|---|
-| `jizura_parts` | 查有哪些风格 / 版面 / 装饰可选 |
-| `jizura_plan` | 歌词或字幕 → cut 计划 + 联络图（每 cut 一帧，先看再渲） |
-| `jizura_render` | 出 MP4，或出透明前景/后景层交给 HyperFrames |
-| `jizura_health` | 自检 Chrome / ffmpeg / 引擎版本 |
+| `jizura_parts` | 列出可用的风格、版面、装饰 |
+| `jizura_plan` | 歌词或字幕 → cut 计划 + 联络图 + `project.json` |
+| `jizura_render` | 生成 MP4，或透明前景/后景层 |
+| `jizura_health` | 检查 Chrome、ffmpeg、引擎版本 |
 
 ## 安装
 
@@ -29,19 +28,37 @@ cd ~/.dsh/profiles/desktop
 pnpm add github:sunleo994946-source/DSH_JIZURA
 ```
 
-然后在 `~/.dsh/profiles/desktop/package.json` 的 `dsh.profile.bundles` 数组里加一项：
+在 `~/.dsh/profiles/desktop/package.json` 的 `dsh.profile.bundles` 数组中添加一项：
 
 ```json
 "bundles": ["...", "dsh-jizura"]
 ```
 
-**重启 DSH。** 重启后让 AI 跑一句 `jizura_health`，看到 Chrome 和 ffmpeg 都是 ✅ 就成了。
+然后重启 DSH。插件在启动时加载，未重启时工具不会出现。装好后调用 `jizura_health` 确认 Chrome 与 ffmpeg 均可用。
 
-> 没生效的三种原因：忘加 `bundles`、忘了重启、`node_modules/dsh-jizura` 不存在。
+> 工具未出现时按顺序检查：`bundles` 是否添加、是否重启、`node_modules/dsh-jizura` 是否存在。
 
-## 怎么跟 AI 说
+## 用法
 
-复制下面这段，把 `{…}` 换成你的真实内容。**只有前两行必填**，其余不填就按默认走：
+三个工具依次使用：
+
+| 步骤 | 工具 | 产出 |
+|---|---|---|
+| 1 | `jizura_parts` | 可选的风格、版面、装饰清单 |
+| 2 | `jizura_plan` | cut 计划 + 联络图（每个 cut 一帧）+ `project.json` |
+| 3 | `jizura_render` | MP4，或透明前景/后景层 |
+
+第 2 步的联络图用于确认效果，避免整片渲完才发现风格不对。
+
+输出三种形态：
+
+- **独立 MP4** — 完整成片，可混入音轨
+- **黑底素材** — `keyBg: "black"`，用 `mix-blend-mode: screen` 叠到 HyperFrames 舞台
+- **透明分层** — `png_back/` 与 `png_front/`，中间插入自有素材
+
+## 提示词模板
+
+替换 `{…}` 后使用。前两行必填，其余留空按默认值。
 
 ```
 用 jizura 做一条文字PV。
@@ -51,27 +68,13 @@ pnpm add github:sunleo994946-source/DSH_JIZURA
 画面：{9:16 竖屏 / 16:9}，{1080}p，{30}fps
 风格：{一句话，例如"和風、纸感"、"赛博霓虹"、"印刷品黑白"}
 交付：{独立 MP4 / 嵌进 HyperFrames 工程 <路径>}
-音乐：{assets/song.mp3，没有就删掉这行}
-其它：{不要恐怖；保留 project.json 方便重渲}
+音乐：{assets/song.mp3，没有则删除此行}
+其它：{不要恐怖；保留 project.json 以便重渲}
 
-先出联络图给我看，我确认后再渲全片。
+先出联络图，我确认后再渲染整片。
 ```
 
-**关于字幕**：`.srt` / `.lrc` / `.vtt` 都能直接给。时间戳会变成每行的起始时刻——比按字数猜准得多，也不需要额外的音频分析。纯 `.txt` 也可以，那就是无时间的歌词。
-
-**你要交代清楚的只有**：歌词（或字幕）、语言。剩下的（挑风格、定 seed、切 cut、渲图）AI 会自己跑，跑完给你看联络图。
-
-> AI 不需要你提供部件 key、seed 或浏览器操作；它自己有 `jizura_parts` 和 `jizura_plan`。
-
-## 使用流程
-
-```
-jizura_parts → jizura_plan（看联络图定稿）→ jizura_render
-```
-
-关键是第二步的联络图：一张图里每个 cut 一帧，先看它调风格，满意了再渲全片。
-
-三种交付形式：独立 MP4 / 黑底色键叠到 HyperFrames / 透明前后景层夹住素材。
+字幕支持 `.srt` / `.lrc` / `.vtt`，时间戳作为每行的起始时刻；`.txt` 视为不带时间的歌词。插件不做音频节拍分析，字幕时间戳是让歌词对齐音乐的可行方式。
 
 ## 许可
 
