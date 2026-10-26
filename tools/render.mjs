@@ -117,11 +117,23 @@ try {
 
   if (argv.dry) { say('--dry：只出计划与联络图'); }
   else if (argv.layers) {
+    say('开始渲染透明分层（back + front 两趟，帧数 ×2）…');
     const l = await r.renderLayers({ outDir, scale: argv.scale ? Number(argv.scale) : 1, format: argv.alphaFormat || 'png', fps: argv.fps ? Number(argv.fps) : undefined });
     say(`分层 ${l.width}×${l.height} · ${l.frames} 帧`);
     if (l.png) for (const [k, d] of Object.entries(l.png)) say(`  ${k.padEnd(5)} ${d}`);
     say(`  清单 ${l.manifest}`);
   } else {
+    // 先说清楚要渲多久：整首 1080p 约 4 分钟，终端没动静时容易以为卡死
+    const rate = (argv.fps ? Number(argv.fps) : prepared.fps) || 24;
+    const startAt = argv.from ? Number(argv.from) : 0;
+    const endAt = argv.to ? Number(argv.to) : prepared.duration;
+    const frames = Math.max(1, Math.round((endAt - startAt) * rate));
+    const mins = frames * 0.03 / 60;                 // 实测 ~30ms/帧（1080p）
+    const eta = mins < 1 ? `${Math.ceil(mins * 60)} 秒` : `${mins.toFixed(1)} 分钟`;
+    say(`开始渲染 ${frames} 帧 @${rate}fps（${(endAt - startAt).toFixed(1)}s），预计 ${eta}；完成后接 ffmpeg 编码`);
+    say('进度每 2 秒刷新一次，中途没有新行说明还在跑，不要中断');
+
+    let last = 0;
     const v = await r.renderVideo({
       out: path.join(outDir, 'lyrics.mp4'),
       fps: argv.fps ? Number(argv.fps) : undefined,
@@ -130,9 +142,18 @@ try {
       audio: argv.audio ? path.resolve(argv.audio.replace(/^~/, process.env.HOME)) : null,
       from: argv.from ? Number(argv.from) : 0,
       to: argv.to ? Number(argv.to) : null,
-      onProgress: p => { if (p.done % 300 === 0 || p.done === p.total) process.stdout.write(`\r  渲染 ${p.done}/${p.total}`); },
+      onProgress: p => {
+        const now = Date.now();
+        if (now - last < 2000 && p.done !== p.total) return;
+        last = now;
+        const pct = ((p.done / p.total) * 100).toFixed(0).padStart(3);
+        const el = Math.round(p.ms / 1000);
+        const left = p.done > 0 ? Math.round((p.ms / p.done) * (p.total - p.done) / 1000) : 0;
+        process.stdout.write(`\r  ${pct}%  ${p.done}/${p.total}  已用 ${el}s  剩余 ~${left}s   `);
+      },
     });
-    process.stdout.write('\r');
+    process.stdout.write('\r' + ' '.repeat(60) + '\r');
+    say('编码中（ffmpeg x264，1080p 约 10–30 秒）…');
     const mb = (fs.statSync(v.file).size / 1048576).toFixed(1);
     say(`视频 ${v.file} · ${v.frames} 帧 · ${mb} MB${v.audio ? '（含音轨）' : ''}`);
   }
