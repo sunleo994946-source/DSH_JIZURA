@@ -85,5 +85,49 @@ ok(/horror/.test(moodOut), '情绪可查');
 const healthOut = await registered.get('jizura_health').execute({});
 ok(/Chrome/.test(healthOut) && /ffmpeg/.test(healthOut), '自检报告 Chrome 与 ffmpeg');
 
+console.log('\n6) 字幕解析（SRT / LRC / VTT / 纯文本）');
+const { subtitlesToLyrics } = await import(path.join(root, 'lib/subtitles.js'));
+
+const SRT = `1
+00:00:01,000 --> 00:00:03,500
+夜明けの色を
+覚えてる
+
+2
+00:00:03,500 --> 00:00:06,200
+<i>ほどけた声が</i>遠くで鳴った
+`;
+const srt = subtitlesToLyrics(SRT, 'a.srt');
+ok(srt.format === 'srt', 'SRT 被识别', srt.format);
+ok(srt.lines === 2, 'SRT 两行', String(srt.lines));
+ok(srt.lyrics.includes('[00:01.00]'), 'SRT 时间转成 [mm:ss.cc]');
+ok(srt.lyrics.includes('夜明けの色を覚えてる'), 'SRT 多行合并（CJK 不插空格）');
+ok(!srt.lyrics.includes('<i>'), 'HTML 标签被剥离');
+
+const LRC = `[ar:X]
+[00:01.00]夜明けの色を
+[00:03.50][00:30.00]透明なままじゃ
+`;
+const lrc = subtitlesToLyrics(LRC, 'a.lrc');
+ok(lrc.format === 'lrc', 'LRC 被识别', lrc.format);
+ok(lrc.lines === 3, 'LRC 多时间戳展开成多行', String(lrc.lines));
+ok(!lrc.lyrics.includes('[ar:'), 'LRC 元数据被跳过');
+
+const VTT = `WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+Hello world
+`;
+const vtt = subtitlesToLyrics(VTT, 'a.vtt');
+ok(vtt.format === 'vtt' && vtt.lyrics.includes('[00:01.00]Hello world'), 'VTT 可用', vtt.format);
+
+const TXT = '一行一句\n不带时间\n';
+const txt = subtitlesToLyrics(TXT, 'a.txt');
+ok(txt.format === 'text' && txt.timed === 0 && txt.lines === 2, '纯文本当成无时间歌词', `${txt.lines} 行`);
+
+let threw = false;
+try { subtitlesToLyrics('这不是字幕', 'a.txt'); } catch { threw = true; }
+ok(!threw, '纯文本不抛错');
+
 console.log(`\n${failed === 0 ? '全部通过 ✅' : failed + ' 项失败 ❌'}`);
 process.exit(failed === 0 ? 0 : 1);

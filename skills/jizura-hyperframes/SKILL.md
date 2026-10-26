@@ -32,6 +32,7 @@ Starts headless Chrome, plans the song, renders one still per cut into a grid im
 ```
 jizura_plan {
   lyrics: "夜明けの色を/覚えてる\nほどけた声が遠くで鳴った",   // '/' = manual cut, '*' = emphasis, '!' = hit, '[interlude 8]' = instrumental
+  subtitles?: "song.srt",            // .srt/.lrc/.vtt/.txt instead of lyrics (path, or paste the content)
   out?: "videos/song/jizura",        // default: <cwd>/jizura-out/<slug>
   aspect?: "16:9"|"9:16"|"4:3"|"3:4"|"1:1"|"4:5"|"21:9",
   resolution?: 720|1080|1440|2160,   // frame height
@@ -44,6 +45,8 @@ jizura_plan {
 }
 ```
 Reads back: duration, size, per-cut table (`start–end  text | layout/enter/hold/exit | decor | bg | cam`), font status, contact sheet path.
+
+`subtitles` accepts an `.srt` / `.lrc` / `.vtt` / `.txt` file path (or the raw text). Timings become each line's start time, so **the lyric starts when the subtitle cue starts** — this is the honest way to get line timing without audio analysis. Multi-line cues are joined (no space for CJK, one space for Latin); HTML/ASS tags are stripped.
 
 `overrides` is keyed by **lyric line index** (0-based, counting every line including interlude lines), not by cut index: one line can produce several cuts and they all take the line's override. `cuts: n` forces that line into exactly n cuts; `single:true` forces one.
 
@@ -102,5 +105,5 @@ Same `project.json` → byte-identical frames, including film grain and paper te
 
 ## Known limits
 - Fonts load from Google Fonts at render time; offline renders fall back to system faces (reported by `jizura_plan`).
-- No audio analysis yet: JIZURA times cuts from lyric length, not from beats. If beat sync matters, set `overrides: { "<line>": { cuts: 1 } }` and place the sections yourself, or compose the beat grid on the HyperFrames side and cut there.
+- No audio analysis yet: JIZURA times cuts from lyric length, not from beats. Passing burnt-in subtitles (`subtitles`) is the practical substitute when the song already has a subtitle file. If beat sync matters, set `overrides: { "<line>": { cuts: 1 } }` and place the sections yourself, or compose the beat grid on the HyperFrames side and cut there.
 - VP9-alpha WebM is deliberately not offered (ffmpeg builds drop its alpha silently). Use the PNG sequence or ProRes 4444.
